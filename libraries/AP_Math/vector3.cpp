@@ -231,6 +231,18 @@ void Vector3<T>::rotate(enum Rotation rotation)
         z = -0.932324f * tmpx +  0.361625f * tmpy +  0.000000f * tmpz;
         return;
     }
+    case ROTATION_YAW_180_PITCH_55: {
+        //acutally yaw of 180, then a pitch of 54.74 up
+        //180 yaw:
+        //z is vertical axis (up), x is fowards, y is right
+        float tmpx = x;
+        float tmpy = y;
+        float tmpz = z;
+        x = -0.577288f * tmpx +  0.000000f * tmpy + -0.816541f * tmpz;
+        y =  0.000000f * tmpx + -1.000000f * tmpy +  0.000000f * tmpz;
+        z = -0.816541f * tmpx +  0.000000f * tmpy +  0.577288f * tmpz;
+        return;
+    }
     }
 }
 
