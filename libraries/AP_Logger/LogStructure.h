@@ -132,6 +132,7 @@ const struct MultiplierStructure log_Multipliers[] = {
 #include <AC_PrecLand/LogStructure.h>
 #include <AC_Avoidance/LogStructure.h>
 #include <AP_ESC_Telem/LogStructure.h>
+#include <AP_AIS/LogStructure.h>
 
 // structure used to define logging format
 struct LogStructure {
@@ -1316,7 +1317,9 @@ LOG_STRUCTURE_FROM_VISUALODOM \
     { LOG_PSC_MSG, sizeof(log_PSC), \
       "PSC", "Qffffffffffff", "TimeUS,TPX,TPY,PX,PY,TVX,TVY,VX,VY,TAX,TAY,AX,AY", "smmmmnnnnoooo", "F000000000000" }, \
     { LOG_PSCZ_MSG, sizeof(log_PSCZ), \
-      "PSCZ", "Qfffffffff", "TimeUS,TPZ,PZ,DVZ,TVZ,VZ,DAZ,TAZ,AZ,ThO", "smmnnnooo%", "F000000002" }
+      "PSCZ", "Qfffffffff", "TimeUS,TPZ,PZ,DVZ,TVZ,VZ,DAZ,TAZ,AZ,ThO", "smmnnnooo%", "F000000002" }, \
+LOG_STRUCTURE_FROM_AIS
+
 
 // @LoggerMessage: SBPH
 // @Description: Swift Health Data
@@ -1430,6 +1433,8 @@ enum LogMessages : uint8_t {
     LOG_PSCZ_MSG,
     LOG_RAW_PROXIMITY_MSG,
     LOG_IDS_FROM_PRECLAND,
+    LOG_IDS_FROM_AIS,
+
 
     _LOG_LAST_MSG_
 };
