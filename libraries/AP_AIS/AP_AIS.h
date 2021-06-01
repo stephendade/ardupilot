@@ -92,6 +92,9 @@ private:
 
     uint16_t _send_index; // index of the last vessel send over mavlink
 
+    // copy AIS targets into OADB
+    AP_Int8     _use_oadb;
+
     // removed the given index from the AIVDM buffer shift following elements
     void buffer_shift(uint8_t i);
 
