@@ -54,7 +54,8 @@ def _vehicle_index(vehicle):
 # note that AP_NavEKF3_core.h is needed for AP_NavEKF3_feature.h
 _vehicle_macros = ['SKETCHNAME', 'SKETCH', 'APM_BUILD_DIRECTORY',
                    'APM_BUILD_TYPE',
-                   'AP_NavEKF3_core.h']
+                   'AP_NavEKF3_core.h',
+                   'AP_AIS.h']
 _macros_re = re.compile(r'\b(%s)\b' % '|'.join(_vehicle_macros))
 
 def _remove_comments(s):
@@ -163,6 +164,7 @@ class ap_library_check_headers(Task.Task):
         'libraries/AP_Common/AP_FWVersionDefine.h',
         'libraries/AP_Scripting/lua_generated_bindings.h',
         'libraries/AP_NavEKF3/AP_NavEKF3_feature.h',
+        'libraries/AP_AIS/AP_AIS.h',
     )
     whitelist = tuple(os.path.join(*p.split('/')) for p in whitelist)
 
