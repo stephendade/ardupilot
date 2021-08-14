@@ -46,6 +46,7 @@
 #include <AP_Frsky_Telem/AP_Frsky_Parameters.h>
 #include <AP_ExternalAHRS/AP_ExternalAHRS.h>
 #include <AP_VideoTX/AP_SmartAudio.h>
+#include <AP_AIS/AP_AIS.h>
 
 class AP_Vehicle : public AP_HAL::HAL::Callbacks {
 
@@ -335,6 +336,11 @@ protected:
     
 #if HAL_SMARTAUDIO_ENABLED
     AP_SmartAudio smartaudio;
+#endif
+
+#if HAL_AIS_ENABLED
+    // Automatic Identification System - for tracking sea-going vehicles
+    AP_AIS ais;
 #endif
 
     static const struct AP_Param::GroupInfo var_info[];
