@@ -63,6 +63,11 @@ const AP_Param::GroupInfo AP_AIS::var_info[] = {
 // constructor
 AP_AIS::AP_AIS()
 {
+    if (_singleton != nullptr) {
+        AP_HAL::panic("AIS must be singleton");
+    }
+    _singleton = this;
+
     AP_Param::setup_object_defaults(this, var_info);
 }
 
@@ -814,5 +819,7 @@ int16_t AP_AIS::char_to_hex(char a)
     else
         return a - '0';
 }
+
+AP_AIS *AP_AIS::_singleton;
 
 #endif  // HAL_AIS_ENABLED
