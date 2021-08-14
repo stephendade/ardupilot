@@ -47,7 +47,6 @@
 #include <AP_Winch/AP_Winch.h>
 #include <AP_OSD/AP_OSD.h>
 #include <AP_RCTelemetry/AP_CRSF_Telem.h>
-#include <AP_AIS/AP_AIS.h>
 
 #include <stdio.h>
 
@@ -5113,6 +5112,17 @@ bool GCS_MAVLINK::try_send_message(const enum ap_message id)
         CHECK_PAYLOAD_SIZE(WATER_DEPTH);
         send_water_depth();
         break;
+
+    case MSG_AIS_VESSEL: {
+#if HAL_AIS_ENABLED
+        AP_AIS *ais = AP_AIS::get_singleton();
+        if (ais) {
+            ais->send(chan);
+        }
+#endif
+        break;
+    }
+
 
     default:
         // try_send_message must always at some stage return true for
