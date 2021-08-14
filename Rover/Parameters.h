@@ -404,10 +404,6 @@ public:
     // FS options
     AP_Int32 fs_options;
 
-#if HAL_AIS_ENABLED
-    // Automatic Identification System - for tracking sea-going vehicles
-    AP_AIS ais;
-#endif
 };
 
 extern const AP_Param::Info var_info[];
