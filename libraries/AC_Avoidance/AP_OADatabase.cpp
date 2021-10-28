@@ -466,6 +466,25 @@ void AP_OADatabase::send_adsb_vehicle(mavlink_channel_t chan, uint16_t interval_
     }
 }
 
+
+// push a location into the database
+void AP_OADatabase::queue_push(const Location &loc, uint32_t timestamp_ms)
+{
+    if (!healthy()) {
+        return;
+    }
+
+    Location ekf_origin;
+    if (!AP::ahrs().get_origin(ekf_origin)) {
+        return;
+    }
+
+    const Vector3f pos = ekf_origin.get_distance_NED(loc);
+    const float distance = ekf_origin.get_distance(loc);
+
+    queue_push(pos, timestamp_ms, distance);
+} 
+
 // singleton instance
 AP_OADatabase *AP_OADatabase::_singleton;
 

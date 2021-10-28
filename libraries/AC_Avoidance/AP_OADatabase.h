@@ -4,6 +4,7 @@
 #include <AP_Math/AP_Math.h>
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include <AP_Param/AP_Param.h>
+#include <AP_Common/Location.h>
 
 class AP_OADatabase {
 public:
@@ -51,6 +52,9 @@ public:
 
     // send ADSB_VEHICLE mavlink messages
     void send_adsb_vehicle(mavlink_channel_t chan, uint16_t interval_ms);
+
+    // push an object into the database in world frame
+    void queue_push(const Location &loc, uint32_t timestamp_ms);
 
     static const struct AP_Param::GroupInfo var_info[];
 
