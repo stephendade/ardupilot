@@ -96,6 +96,9 @@ private:
     // list of the vessels that are being tracked
     AP_ExpandingArray<ais_vehicle_t> _list {8};
 
+    // copy AIS targets into OADB
+    AP_Int8     _use_oadb;
+
     AP_HAL::UARTDriver *_uart;
 
     uint16_t _send_index; // index of the last vessel send over mavlink

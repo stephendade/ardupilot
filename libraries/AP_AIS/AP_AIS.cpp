@@ -24,6 +24,7 @@
 #include <AP_Logger/AP_Logger.h>
 #include <GCS_MAVLink/GCS_MAVLink.h>
 #include <GCS_MAVLink/GCS.h>
+#include <AC_Avoidance/AP_OADatabase.h>
 
 const AP_Param::GroupInfo AP_AIS::var_info[] = {
 
@@ -56,6 +57,13 @@ const AP_Param::GroupInfo AP_AIS::var_info[] = {
     // @Bitmask: 0:Log all AIVDM messages,1:Log only unsupported AIVDM messages,2:Log decoded messages
     // @User: Advanced
     AP_GROUPINFO("LOGGING", 4, AP_AIS, _log_options, AIS_OPTIONS_LOG_UNSUPPORTED_RAW | AIS_OPTIONS_LOG_DECODED),
+
+    // @Param: USE_OADB
+    // @DisplayName: Use the Object Avoidance Database
+    // @Description: This feature will load AIS targets into the Object Avoidance Database for use with other avoidance algorithms. See OA_ params.
+    // @Values: 0:Disabled,1:Enabled
+    // @User: Advanced
+    AP_GROUPINFO("USE_OADB", 5, AP_AIS, _use_oadb, 0),
 
     AP_GROUPEND
 };
@@ -402,6 +410,15 @@ bool AP_AIS::decode_position_report(const char *payload, uint8_t type)
             radio        : radio
         };
         AP::logger().WriteBlock(&pkt, sizeof(pkt));
+    }
+
+
+    // notify OADB
+    if (_use_oadb) {
+        AP_OADatabase *oaDb = AP::oadatabase();
+        if (oaDb != nullptr) {
+            oaDb->queue_push(Location(lat, lon, 0, Location::AltFrame::ABSOLUTE), AP_HAL::millis());
+        }
     }
 
     uint16_t index;
