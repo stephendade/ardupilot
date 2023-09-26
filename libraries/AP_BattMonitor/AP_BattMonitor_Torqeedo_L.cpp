@@ -18,7 +18,7 @@
 
 #if AP_BATTERY_TORQEEDO_ENABLED
 
-#include "AP_BattMonitor_Torqeedo.h"
+#include "AP_BattMonitor_Torqeedo_L.h"
 
 #include <AP_HAL/AP_HAL.h>
 
@@ -26,9 +26,9 @@
 
 extern const AP_HAL::HAL &hal;
 
-void AP_BattMonitor_Torqeedo::read(void)
+void AP_BattMonitor_Torqeedo_L::read(void)
 {
-    AP_Torqeedo *torqeedo = AP_Torqeedo::get_singleton();
+    AP_Torqeedo_L *torqeedo = AP_Torqeedo_L::get_singleton();
     if (torqeedo == nullptr) {
         _state.healthy = false;
         return;
@@ -68,7 +68,7 @@ void AP_BattMonitor_Torqeedo::read(void)
 }
 
 // capacity_remaining_pct - returns true if the battery % is available and writes to the percentage argument
-bool AP_BattMonitor_Torqeedo::capacity_remaining_pct(uint8_t &percentage) const
+bool AP_BattMonitor_Torqeedo_L::capacity_remaining_pct(uint8_t &percentage) const
 {
     if (have_info) {
         percentage = remaining_pct;

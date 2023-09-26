@@ -97,7 +97,8 @@ void Rover::init_ardupilot()
 
 #if HAL_TORQEEDO_ENABLED
     // init torqeedo motor driver
-    g2.torqeedo.init();
+    g2.torqeedo_L.init();
+    g2.torqeedo_R.init();
 #endif
 
 #if AP_OPTICALFLOW_ENABLED

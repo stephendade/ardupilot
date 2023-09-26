@@ -13,7 +13,7 @@
    along with this program.  If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include "AP_Torqeedo.h"
+#include "AP_Torqeedo_L.h"
 
 #if HAL_TORQEEDO_ENABLED
 
@@ -39,7 +39,7 @@
 extern const AP_HAL::HAL& hal;
 
 // parameters
-const AP_Param::GroupInfo AP_Torqeedo::var_info[] = {
+const AP_Param::GroupInfo AP_Torqeedo_L::var_info[] = {
 
     // @Param: TYPE
     // @DisplayName: Torqeedo connection type
@@ -47,7 +47,7 @@ const AP_Param::GroupInfo AP_Torqeedo::var_info[] = {
     // @Values: 0:Disabled, 1:Tiller, 2:Motor
     // @User: Standard
     // @RebootRequired: True
-    AP_GROUPINFO_FLAGS("TYPE", 1, AP_Torqeedo, _type, (int8_t)ConnectionType::TYPE_DISABLED, AP_PARAM_FLAG_ENABLE),
+    AP_GROUPINFO_FLAGS("TYPE", 1, AP_Torqeedo_L, _type, (int8_t)ConnectionType::TYPE_DISABLED, AP_PARAM_FLAG_ENABLE),
 
     // @Param: ONOFF_PIN
     // @DisplayName: Torqeedo ON/Off pin
@@ -55,7 +55,7 @@ const AP_Param::GroupInfo AP_Torqeedo::var_info[] = {
     // @Values: -1:Disabled,50:AUX1,51:AUX2,52:AUX3,53:AUX4,54:AUX5,55:AUX6
     // @User: Standard
     // @RebootRequired: True
-    AP_GROUPINFO("ONOFF_PIN", 2, AP_Torqeedo, _pin_onoff, -1),
+    AP_GROUPINFO("ONOFF_PIN", 2, AP_Torqeedo_L, _pin_onoff, -1),
 
     // @Param: DE_PIN
     // @DisplayName: Torqeedo DE pin
@@ -63,14 +63,14 @@ const AP_Param::GroupInfo AP_Torqeedo::var_info[] = {
     // @Values: -1:Disabled,50:AUX1,51:AUX2,52:AUX3,53:AUX4,54:AUX5,55:AUX6
     // @User: Standard
     // @RebootRequired: True
-    AP_GROUPINFO("DE_PIN", 3, AP_Torqeedo, _pin_de, -1),
+    AP_GROUPINFO("DE_PIN", 3, AP_Torqeedo_L, _pin_de, -1),
 
     // @Param: OPTIONS
     // @DisplayName: Torqeedo Options
     // @Description: Torqeedo Options Bitmask
     // @Bitmask: 0:Log,1:Send debug to GCS
     // @User: Advanced
-    AP_GROUPINFO("OPTIONS", 4, AP_Torqeedo, _options, (int8_t)options::LOG),
+    AP_GROUPINFO("OPTIONS", 4, AP_Torqeedo_L, _options, (int8_t)options::LOG),
 
     // @Param: POWER
     // @DisplayName: Torqeedo Motor Power
@@ -79,7 +79,7 @@ const AP_Param::GroupInfo AP_Torqeedo::var_info[] = {
     // @Range: 0 100
     // @Increment: 1
     // @User: Advanced
-    AP_GROUPINFO("POWER", 5, AP_Torqeedo, _motor_power, 100),
+    AP_GROUPINFO("POWER", 5, AP_Torqeedo_L, _motor_power, 100),
 
     // @Param: SLEW_TIME
     // @DisplayName: Torqeedo Throttle Slew Time
@@ -88,7 +88,7 @@ const AP_Param::GroupInfo AP_Torqeedo::var_info[] = {
     // @Range: 0 5
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("SLEW_TIME", 6, AP_Torqeedo, _slew_time, 2.0),
+    AP_GROUPINFO("SLEW_TIME", 6, AP_Torqeedo_L, _slew_time, 2.0),
 
     // @Param: DIR_DELAY
     // @DisplayName: Torqeedo Direction Change Delay
@@ -97,19 +97,19 @@ const AP_Param::GroupInfo AP_Torqeedo::var_info[] = {
     // @Range: 0 5
     // @Increment: 0.1
     // @User: Advanced
-    AP_GROUPINFO("DIR_DELAY", 7, AP_Torqeedo, _dir_delay, 1.0),
+    AP_GROUPINFO("DIR_DELAY", 7, AP_Torqeedo_L, _dir_delay, 1.0),
 
     AP_GROUPEND
 };
 
-AP_Torqeedo::AP_Torqeedo()
+AP_Torqeedo_L::AP_Torqeedo_L()
 {
     _singleton = this;
     AP_Param::setup_object_defaults(this, var_info);
 }
 
 // initialise driver
-void AP_Torqeedo::init()
+void AP_Torqeedo_L::init()
 {
     // exit immediately if not enabled
     if (!enabled()) {
@@ -123,17 +123,17 @@ void AP_Torqeedo::init()
     }
 
     // create background thread to process serial input and output
-    if (!hal.scheduler->thread_create(FUNCTOR_BIND_MEMBER(&AP_Torqeedo::thread_main, void), "torqeedo", 2048, AP_HAL::Scheduler::PRIORITY_RCOUT, 1)) {
+    if (!hal.scheduler->thread_create(FUNCTOR_BIND_MEMBER(&AP_Torqeedo_L::thread_main, void), "torqeedoL", 2048, AP_HAL::Scheduler::PRIORITY_RCOUT, 1)) {
         return;
     }
 }
 
 // initialise serial port and gpio pins (run from background thread)
-bool AP_Torqeedo::init_internals()
+bool AP_Torqeedo_L::init_internals()
 {
     // find serial driver and initialise
     const AP_SerialManager &serial_manager = AP::serialmanager();
-    _uart = serial_manager.find_serial(AP_SerialManager::SerialProtocol_Torqeedo, 0);
+    _uart = serial_manager.find_serial(AP_SerialManager::SerialProtocol_Torqeedo_L, 0);
     if (_uart == nullptr) {
         return false;
     }
@@ -168,7 +168,7 @@ bool AP_Torqeedo::init_internals()
 }
 
 // returns true if the driver is enabled
-bool AP_Torqeedo::enabled() const
+bool AP_Torqeedo_L::enabled() const
 {
     switch ((ConnectionType)_type) {
     case ConnectionType::TYPE_DISABLED:
@@ -183,7 +183,7 @@ bool AP_Torqeedo::enabled() const
 
 // consume incoming messages from motor, reply with latest motor speed
 // runs in background thread
-void AP_Torqeedo::thread_main()
+void AP_Torqeedo_L::thread_main()
 {
     // initialisation
     if (!init_internals()) {
@@ -250,7 +250,7 @@ void AP_Torqeedo::thread_main()
 }
 
 // returns true if communicating with the motor
-bool AP_Torqeedo::healthy()
+bool AP_Torqeedo_L::healthy()
 {
     if (!_initialised) {
         return false;
@@ -265,7 +265,7 @@ bool AP_Torqeedo::healthy()
 
 // run pre-arm check.  returns false on failure and fills in failure_msg
 // any failure_msg returned will not include a prefix
-bool AP_Torqeedo::pre_arm_checks(char *failure_msg, uint8_t failure_msg_len)
+bool AP_Torqeedo_L::pre_arm_checks(char *failure_msg, uint8_t failure_msg_len)
 {
     // exit immediately if not enabled
     if (!enabled()) {
@@ -286,7 +286,7 @@ bool AP_Torqeedo::pre_arm_checks(char *failure_msg, uint8_t failure_msg_len)
 // returns a human-readable string corresponding the passed-in
 // master error code (see page 93 of https://media.torqeedo.com/downloads/manuals/torqeedo-Travel-manual-DE-EN.pdf)
 // If no conversion is available then nullptr is returned
-const char * AP_Torqeedo::map_master_error_code_to_string(uint8_t code) const
+const char * AP_Torqeedo_L::map_master_error_code_to_string(uint8_t code) const
 {
     switch (code) {
     case 2:
@@ -328,7 +328,7 @@ const char * AP_Torqeedo::map_master_error_code_to_string(uint8_t code) const
 }
 
 // report changes in error codes to user
-void AP_Torqeedo::report_error_codes()
+void AP_Torqeedo_L::report_error_codes()
 {
     // skip reporting if we have already reported status very recently
     const uint32_t now_ms = AP_HAL::millis();
@@ -343,7 +343,7 @@ void AP_Torqeedo::report_error_codes()
     }
 
     // report display system errors
-    const char* msg_prefix = "Torqeedo:";
+    const char* msg_prefix = "TorqeedoL:";
     if (_display_system_state.flags.set_throttle_stop) {
         gcs().send_text(MAV_SEVERITY_CRITICAL, "%s zero throttle required", msg_prefix);
     }
@@ -416,7 +416,7 @@ void AP_Torqeedo::report_error_codes()
 }
 
 // get latest battery status info.  returns true on success and populates arguments
-bool AP_Torqeedo::get_batt_info(float &voltage, float &current_amps, float &temp_C, uint8_t &pct_remaining) const
+bool AP_Torqeedo_L::get_batt_info(float &voltage, float &current_amps, float &temp_C, uint8_t &pct_remaining) const
 {
 
     // use battery info from display_system_state if available (tiller connection)
@@ -441,7 +441,7 @@ bool AP_Torqeedo::get_batt_info(float &voltage, float &current_amps, float &temp
 }
 
 // get battery capacity.  returns true on success and populates argument
-bool AP_Torqeedo::get_batt_capacity_Ah(uint16_t &amp_hours) const
+bool AP_Torqeedo_L::get_batt_capacity_Ah(uint16_t &amp_hours) const
 {
     if (_display_system_setup.batt_capacity == 0) {
         return false;
@@ -452,7 +452,7 @@ bool AP_Torqeedo::get_batt_capacity_Ah(uint16_t &amp_hours) const
 
 // process a single byte received on serial port
 // return true if a complete message has been received (the message will be held in _received_buff)
-bool AP_Torqeedo::parse_byte(uint8_t b)
+bool AP_Torqeedo_L::parse_byte(uint8_t b)
 {
     bool complete_msg_received = false;
 
@@ -513,7 +513,7 @@ bool AP_Torqeedo::parse_byte(uint8_t b)
 }
 
 // process message held in _received_buff
-void AP_Torqeedo::parse_message()
+void AP_Torqeedo_L::parse_message()
 {
     // message address (i.e. target of message)
     const MsgAddress msg_addr = (MsgAddress)_received_buff[0];
@@ -565,8 +565,8 @@ void AP_Torqeedo::parse_message()
 
                 // log data
                 if ((_options & options::LOG) != 0) {
-                    // @LoggerMessage: TRST
-                    // @Description: Torqeedo System State
+                    // @LoggerMessage: TSTL
+                    // @Description: Torqeedo System State Left
                     // @Field: TimeUS: Time since system startup
                     // @Field: F: Flags bitmask
                     // @Field: Err: Master error code
@@ -578,7 +578,7 @@ void AP_Torqeedo::parse_message()
                     // @Field: BPct: Battery charge percentage
                     // @Field: BVolt: Battery voltage
                     // @Field: BCur: Battery current
-                    AP::logger().Write("TRST", "TimeUS,F,Err,MVolt,MCur,Pow,RPM,MTemp,BPct,BVolt,BCur", "QHBffHhBBff",
+                    AP::logger().Write("TSTL", "TimeUS,F,Err,MVolt,MCur,Pow,RPM,MTemp,BPct,BVolt,BCur", "QHBffHhBBff",
                                        AP_HAL::micros64(),
                                        _display_system_state.flags.value,
                                        _display_system_state.master_error_code,
@@ -594,7 +594,7 @@ void AP_Torqeedo::parse_message()
 
                 // send to GCS
                 if ((_options & options::DEBUG_TO_GCS) != 0) {
-                    gcs().send_text(MAV_SEVERITY_INFO,"TRST F:%u Err:%u MV:%4.1f MC:%4.1f P:%u MT:%d B%%:%d BV:%4.1f BC:%4.1f",
+                    gcs().send_text(MAV_SEVERITY_INFO,"TSTL F:%u Err:%u MV:%4.1f MC:%4.1f P:%u MT:%d B%%:%d BV:%4.1f BC:%4.1f",
                             (unsigned)_display_system_state.flags.value,
                             (unsigned)_display_system_state.master_error_code,
                             (double)_display_system_state.motor_voltage,
@@ -626,8 +626,8 @@ void AP_Torqeedo::parse_message()
 
                 // log data
                 if ((_options & options::LOG) != 0) {
-                    // @LoggerMessage: TRSE
-                    // @Description: Torqeedo System Setup
+                    // @LoggerMessage: TSEL
+                    // @Description: Torqeedo System Setup Left
                     // @Field: TimeUS: Time since system startup
                     // @Field: Flag: Flags
                     // @Field: MotType: Motor type
@@ -636,7 +636,7 @@ void AP_Torqeedo::parse_message()
                     // @Field: BattPct: Battery charge percentage
                     // @Field: BattType: Battery type
                     // @Field: SwVer: Master software version
-                    AP::logger().Write("TRSE", "TimeUS,Flag,MotType,MotVer,BattCap,BattPct,BattType,SwVer", "QBBHHBBH",
+                    AP::logger().Write("TSEL", "TimeUS,Flag,MotType,MotVer,BattCap,BattPct,BattType,SwVer", "QBBHHBBH",
                                        AP_HAL::micros64(),
                                        _display_system_setup.flags,
                                        _display_system_setup.motor_type,
@@ -649,7 +649,7 @@ void AP_Torqeedo::parse_message()
 
                 // send to GCS
                 if ((_options & options::DEBUG_TO_GCS) != 0) {
-                    gcs().send_text(MAV_SEVERITY_INFO,"TRSE:%u F:%u Mot:%u/%u Bat:%u/%u/%u%%",
+                    gcs().send_text(MAV_SEVERITY_INFO,"TSEL:%u F:%u Mot:%u/%u Bat:%u/%u/%u%%",
                             (unsigned)_display_system_setup.master_sw_version,
                             (unsigned)_display_system_setup.flags,
                             (unsigned)_display_system_setup.motor_type,
@@ -695,8 +695,8 @@ void AP_Torqeedo::parse_message()
 
                 // log data
                 if ((_options & options::LOG) != 0) {
-                    // @LoggerMessage: TRMP
-                    // @Description: Torqeedo Motor Param
+                    // @LoggerMessage: TMPL
+                    // @Description: Torqeedo Motor Param Left
                     // @Field: TimeUS: Time since system startup
                     // @Field: RPM: Motor RPM
                     // @Field: Pow: Motor power
@@ -704,7 +704,7 @@ void AP_Torqeedo::parse_message()
                     // @Field: Cur: Motor current
                     // @Field: ETemp: ESC Temp
                     // @Field: MTemp: Motor Temp
-                    AP::logger().Write("TRMP", "TimeUS,RPM,Pow,Volt,Cur,ETemp,MTemp", "QhHffff",
+                    AP::logger().Write("TMPL", "TimeUS,RPM,Pow,Volt,Cur,ETemp,MTemp", "QhHffff",
                                        AP_HAL::micros64(),
                                        _motor_param.rpm,
                                        _motor_param.power,
@@ -716,7 +716,7 @@ void AP_Torqeedo::parse_message()
 
                 // send to GCS
                 if ((_options & options::DEBUG_TO_GCS) != 0) {
-                    gcs().send_text(MAV_SEVERITY_INFO, "TRMP: rpm:%d p:%u V:%4.1f C:%4.1f PT:%4.1f MT:%4.1f",
+                    gcs().send_text(MAV_SEVERITY_INFO, "TMPL: rpm:%d p:%u V:%4.1f C:%4.1f PT:%4.1f MT:%4.1f",
                                                        (int)_motor_param.rpm,
                                                        (unsigned)_motor_param.power,
                                                        (double)_motor_param.voltage,
@@ -737,12 +737,12 @@ void AP_Torqeedo::parse_message()
 
                 // log data
                 if ((_options & options::LOG) != 0) {
-                    // @LoggerMessage: TRMS
-                    // @Description: Torqeedo Motor Status
+                    // @LoggerMessage: TMSL
+                    // @Description: Torqeedo Motor Status Left
                     // @Field: TimeUS: Time since system startup
                     // @Field: State: Motor status flags
                     // @Field: Err: Motor error flags
-                    AP::logger().Write("TRMS", "TimeUS,State,Err", "QBHH",
+                    AP::logger().Write("TMSL", "TimeUS,State,Err", "QBHH",
                                        AP_HAL::micros64(),
                                        _motor_status.status_flags_value,
                                        _motor_status.error_flags_value);
@@ -750,7 +750,7 @@ void AP_Torqeedo::parse_message()
 
                 // send to GCS
                 if ((_options & options::DEBUG_TO_GCS) != 0) {
-                    gcs().send_text(MAV_SEVERITY_INFO,"TRMS S:%d Err:%d",
+                    gcs().send_text(MAV_SEVERITY_INFO,"TMSL S:%d Err:%d",
                                    _motor_status.status_flags_value,
                                    _motor_status.error_flags_value);
                 }
@@ -777,7 +777,7 @@ void AP_Torqeedo::parse_message()
 }
 
 // set DE Serial CTS pin to enable sending commands to motor
-void AP_Torqeedo::send_start()
+void AP_Torqeedo_L::send_start()
 {
     // set gpio pin or serial port's CTS pin
     if (_pin_de > -1) {
@@ -788,7 +788,7 @@ void AP_Torqeedo::send_start()
 }
 
 // check for timeout after sending and unset pin if required
-void AP_Torqeedo::check_for_send_end()
+void AP_Torqeedo_L::check_for_send_end()
 {
     if (_send_delay_us == 0) {
         // not sending
@@ -810,7 +810,7 @@ void AP_Torqeedo::check_for_send_end()
 }
 
 // calculate delay require to allow bytes to be sent
-uint32_t AP_Torqeedo::calc_send_delay_us(uint8_t num_bytes)
+uint32_t AP_Torqeedo_L::calc_send_delay_us(uint8_t num_bytes)
 {
     // baud rate of 19200 bits/sec
     // total number of bits = 10 x num_bytes
@@ -821,14 +821,14 @@ uint32_t AP_Torqeedo::calc_send_delay_us(uint8_t num_bytes)
 }
 
 // record msgid of message to wait for and set timer for timeout handling
-void AP_Torqeedo::set_expected_reply_msgid(uint8_t msg_id)
+void AP_Torqeedo_L::set_expected_reply_msgid(uint8_t msg_id)
 {
     _reply_msgid = msg_id;
     _reply_wait_start_ms = AP_HAL::millis();
 }
 
 // check for timeout waiting for reply message
-void AP_Torqeedo::check_for_reply_timeout()
+void AP_Torqeedo_L::check_for_reply_timeout()
 {
     // return immediately if not waiting for reply
     if (_reply_wait_start_ms == 0) {
@@ -841,7 +841,7 @@ void AP_Torqeedo::check_for_reply_timeout()
 }
 
 // mark reply received. should be called whenever a message is received regardless of whether we are actually waiting for a reply
-void AP_Torqeedo::set_reply_received()
+void AP_Torqeedo_L::set_reply_received()
 {
     _reply_wait_start_ms = 0;
 }
@@ -849,7 +849,7 @@ void AP_Torqeedo::set_reply_received()
 // send a message to the motor with the specified message contents
 // msg_contents should not include the header, footer or CRC
 // returns true on success
-bool AP_Torqeedo::send_message(const uint8_t msg_contents[], uint8_t num_bytes)
+bool AP_Torqeedo_L::send_message(const uint8_t msg_contents[], uint8_t num_bytes)
 {
     // buffer for outgoing message
     uint8_t send_buff[TORQEEDO_MESSAGE_LEN_MAX];
@@ -898,7 +898,7 @@ bool AP_Torqeedo::send_message(const uint8_t msg_contents[], uint8_t num_bytes)
 // add a byte to a message buffer including adding the escape character (0xAE) if necessary
 // this should only be used when adding the contents to the buffer, not the header and footer
 // num_bytes is updated to the next free byte
-bool AP_Torqeedo::add_byte_to_message(uint8_t byte_to_add, uint8_t msg_buff[], uint8_t msg_buff_size, uint8_t &num_bytes) const
+bool AP_Torqeedo_L::add_byte_to_message(uint8_t byte_to_add, uint8_t msg_buff[], uint8_t msg_buff_size, uint8_t &num_bytes) const
 {
     bool escape_required = (byte_to_add == TORQEEDO_PACKET_HEADER ||
                             byte_to_add == TORQEEDO_PACKET_FOOTER ||
@@ -939,7 +939,7 @@ bool AP_Torqeedo::add_byte_to_message(uint8_t byte_to_add, uint8_t msg_buff[], u
 // value is taken directly from SRV_Channel
 // for tiller connection this sends the "Remote (0x01)" message
 // for motor connection this sends the "Motor Drive (0x82)" message
-void AP_Torqeedo::send_motor_speed_cmd()
+void AP_Torqeedo_L::send_motor_speed_cmd()
 {
     // calculate desired motor speed
     if (!hal.util->get_soft_armed()) {
@@ -947,7 +947,7 @@ void AP_Torqeedo::send_motor_speed_cmd()
     } else {
         // convert throttle output to motor output in range -1000 to +1000
         // ToDo: convert PWM output to motor output so that SERVOx_MIN, MAX and TRIM take effect
-        _motor_speed_desired = constrain_int16(SRV_Channels::get_output_norm(SRV_Channel::Aux_servo_function_t::k_throttle) * 1000.0, -1000, 1000);
+        _motor_speed_desired = constrain_int16(SRV_Channels::get_output_norm(SRV_Channel::Aux_servo_function_t::k_throttleLeft) * 1000.0, -1000, 1000);
     }
 
     // updated limited motor speed
@@ -981,7 +981,7 @@ void AP_Torqeedo::send_motor_speed_cmd()
 
 // send request to motor to reply with a particular message
 // msg_id can be INFO, STATUS or PARAM
-void AP_Torqeedo::send_motor_msg_request(MotorMsgId msg_id)
+void AP_Torqeedo_L::send_motor_msg_request(MotorMsgId msg_id)
 {
     // prepare message
     uint8_t mot_status_request_buff[] = {(uint8_t)MsgAddress::MOTOR, (uint8_t)msg_id};
@@ -995,7 +995,7 @@ void AP_Torqeedo::send_motor_msg_request(MotorMsgId msg_id)
 
 // calculate the limited motor speed that is sent to the motors
 // desired_motor_speed argument and returned value are in the range -1000 to 1000
-int16_t AP_Torqeedo::calc_motor_speed_limited(int16_t desired_motor_speed)
+int16_t AP_Torqeedo_L::calc_motor_speed_limited(int16_t desired_motor_speed)
 {
     const uint32_t now_ms = AP_HAL::millis();
 
@@ -1066,7 +1066,7 @@ int16_t AP_Torqeedo::calc_motor_speed_limited(int16_t desired_motor_speed)
 
 // output logging and debug messages (if required)
 // force_logging should be true if caller wants to ensure the latest status is logged
-void AP_Torqeedo::log_TRQD(bool force_logging)
+void AP_Torqeedo_L::log_TRQD(bool force_logging)
 {
     // exit immediately if options are all unset
     if (_options == 0) {
@@ -1084,15 +1084,15 @@ void AP_Torqeedo::log_TRQD(bool force_logging)
     int16_t actual_motor_speed = get_motor_speed_limited();
 
     if ((_options & options::LOG) != 0) {
-        // @LoggerMessage: TRQD
-        // @Description: Torqeedo Status
+        // @LoggerMessage: TQDL
+        // @Description: Torqeedo Status Left
         // @Field: TimeUS: Time since system startup
         // @Field: Health: Health
         // @Field: DesMotSpeed: Desired Motor Speed (-1000 to 1000)
         // @Field: MotSpeed: Motor Speed (-1000 to 1000)
         // @Field: SuccCnt: Success Count
         // @Field: ErrCnt: Error Count
-        AP::logger().Write("TRQD", "TimeUS,Health,DesMotSpeed,MotSpeed,SuccCnt,ErrCnt", "QBhhII",
+        AP::logger().Write("TQDL", "TimeUS,Health,DesMotSpeed,MotSpeed,SuccCnt,ErrCnt", "QBhhII",
                            AP_HAL::micros64(),
                            health,
                            _motor_speed_desired,
@@ -1102,7 +1102,7 @@ void AP_Torqeedo::log_TRQD(bool force_logging)
     }
 
     if ((_options & options::DEBUG_TO_GCS) != 0) {
-        gcs().send_text(MAV_SEVERITY_INFO,"TRQD h:%u dspd:%d spd:%d succ:%ld err:%ld",
+        gcs().send_text(MAV_SEVERITY_INFO,"TQDL h:%u dspd:%d spd:%d succ:%ld err:%ld",
                 (unsigned)health,
                 (int)_motor_speed_desired,
                 (int)actual_motor_speed,
@@ -1112,12 +1112,12 @@ void AP_Torqeedo::log_TRQD(bool force_logging)
 }
 
 // send ESC telemetry
-void AP_Torqeedo::update_esc_telem(float rpm, float voltage, float current_amps, float esc_tempC, float motor_tempC)
+void AP_Torqeedo_L::update_esc_telem(float rpm, float voltage, float current_amps, float esc_tempC, float motor_tempC)
 {
 #if HAL_WITH_ESC_TELEM
     // find servo output channel
     uint8_t telem_esc_index = 0;
-    IGNORE_RETURN(SRV_Channels::find_channel(SRV_Channel::Aux_servo_function_t::k_throttle, telem_esc_index));
+    IGNORE_RETURN(SRV_Channels::find_channel(SRV_Channel::Aux_servo_function_t::k_throttleLeft, telem_esc_index));
 
     // fill in telemetry data structure
     AP_ESC_Telem_Backend::TelemetryData telem_dat {};
@@ -1136,18 +1136,18 @@ void AP_Torqeedo::update_esc_telem(float rpm, float voltage, float current_amps,
 #endif
 }
 
-// get the AP_Torqeedo singleton
-AP_Torqeedo *AP_Torqeedo::get_singleton()
+// get the AP_Torqeedo_L singleton
+AP_Torqeedo_L *AP_Torqeedo_L::get_singleton()
 {
     return _singleton;
 }
 
-AP_Torqeedo *AP_Torqeedo::_singleton = nullptr;
+AP_Torqeedo_L *AP_Torqeedo_L::_singleton = nullptr;
 
 namespace AP {
-AP_Torqeedo *torqeedo()
+AP_Torqeedo_L *torqeedo_L()
 {
-    return AP_Torqeedo::get_singleton();
+    return AP_Torqeedo_L::get_singleton();
 }
 };
 

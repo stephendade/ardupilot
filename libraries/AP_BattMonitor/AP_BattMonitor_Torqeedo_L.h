@@ -18,13 +18,13 @@
 
 #if AP_BATTERY_TORQEEDO_ENABLED
 
-#include <AP_Torqeedo/AP_Torqeedo.h>
+#include <AP_Torqeedo_L/AP_Torqeedo_L.h>
 
 #include <AP_Common/AP_Common.h>
 #include <AP_HAL/AP_HAL.h>
 #include "AP_BattMonitor_Backend.h"
 
-class AP_BattMonitor_Torqeedo: public AP_BattMonitor_Backend
+class AP_BattMonitor_Torqeedo_L: public AP_BattMonitor_Backend
 {
 public:
 

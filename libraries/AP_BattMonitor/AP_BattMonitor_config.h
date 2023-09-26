@@ -4,7 +4,7 @@
 #include <AP_ESC_Telem/AP_ESC_Telem_config.h>
 #include <AP_EFI/AP_EFI_config.h>
 #include <AP_Generator/AP_Generator_config.h>
-#include <AP_Torqeedo/AP_Torqeedo_config.h>
+#include <AP_Torqeedo_L/AP_Torqeedo_config_L.h>
 
 #ifndef AP_BATTERY_BACKEND_DEFAULT_ENABLED
 #define AP_BATTERY_BACKEND_DEFAULT_ENABLED 1

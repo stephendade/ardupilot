@@ -52,7 +52,8 @@ extern const AP_HAL::HAL& hal;
 #include <AP_Mount/AP_Mount.h>
 #include <AP_Notify/AP_Notify.h>
 #include <AP_VideoTX/AP_VideoTX.h>
-#include <AP_Torqeedo/AP_Torqeedo.h>
+#include <AP_Torqeedo_L/AP_Torqeedo_L.h>
+#include <AP_Torqeedo_R/AP_Torqeedo_R.h>
 #include <AP_Vehicle/AP_Vehicle_Type.h>
 #define SWITCH_DEBOUNCE_TIME_MS  200
 
@@ -1442,9 +1443,13 @@ bool RC_Channel::do_aux_function(const aux_func_t ch_option, const AuxSwitchPos 
     // clear torqeedo error
     case AUX_FUNC::TORQEEDO_CLEAR_ERR: {
         if (ch_flag == AuxSwitchPos::HIGH) {
-            AP_Torqeedo *torqeedo = AP_Torqeedo::get_singleton();
-            if (torqeedo != nullptr) {
-                torqeedo->clear_motor_error();
+            AP_Torqeedo_L *torqeedo_L = AP_Torqeedo_L::get_singleton();
+            if (torqeedo_L != nullptr) {
+                torqeedo_L->clear_motor_error();
+            }
+            AP_Torqeedo_R *torqeedo_R = AP_Torqeedo_R::get_singleton();
+            if (torqeedo_R != nullptr) {
+                torqeedo_R->clear_motor_error();
             }
         }
         break;

@@ -102,7 +102,8 @@ public:
         // 20 was MPPT_PacketDigital
         INA2XX                         = 21,
         LTC2946                        = 22,
-        Torqeedo                       = 23,
+        TorqeedoL                      = 23,
+        TorqeedoR                      = 28,
         FuelLevel_Analog               = 24,
         Analog_Volt_Synthetic_Current  = 25,
         INA239_SPI                     = 26,

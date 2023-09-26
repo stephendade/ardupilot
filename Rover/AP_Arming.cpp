@@ -211,10 +211,17 @@ bool AP_Arming_Rover::motor_checks(bool report)
 
 #if HAL_TORQEEDO_ENABLED
     char failure_msg[50] = {};
-    AP_Torqeedo *torqeedo = AP_Torqeedo::get_singleton();
-    if (torqeedo != nullptr) {
-        if (!torqeedo->pre_arm_checks(failure_msg, ARRAY_SIZE(failure_msg))) {
-            check_failed(report, "Torqeedo: %s", failure_msg);
+    AP_Torqeedo_L *torqeedo_L = AP_Torqeedo_L::get_singleton();
+    if (torqeedo_L != nullptr) {
+        if (!torqeedo_L->pre_arm_checks(failure_msg, ARRAY_SIZE(failure_msg))) {
+            check_failed(report, "Torqeedo_L: %s", failure_msg);
+            ret = false;
+        }
+    }
+    AP_Torqeedo_R *torqeedo_R = AP_Torqeedo_R::get_singleton();
+    if (torqeedo_R != nullptr) {
+        if (!torqeedo_R->pre_arm_checks(failure_msg, ARRAY_SIZE(failure_msg))) {
+            check_failed(report, "Torqeedo_R: %s", failure_msg);
             ret = false;
         }
     }

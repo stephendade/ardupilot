@@ -44,7 +44,7 @@
 
 #pragma once
 
-#include "AP_Torqeedo_config.h"
+#include "AP_Torqeedo_config_R.h"
 
 #if HAL_TORQEEDO_ENABLED
 
@@ -53,13 +53,13 @@
 
 #define TORQEEDO_MESSAGE_LEN_MAX    35  // messages are no more than 35 bytes
 
-class AP_Torqeedo : public AP_ESC_Telem_Backend {
+class AP_Torqeedo_R : public AP_ESC_Telem_Backend {
 public:
-    AP_Torqeedo();
+    AP_Torqeedo_R();
 
-    CLASS_NO_COPY(AP_Torqeedo);
+    CLASS_NO_COPY(AP_Torqeedo_R);
 
-    static AP_Torqeedo* get_singleton();
+    static AP_Torqeedo_R* get_singleton();
 
     // initialise driver
     void init();
@@ -354,7 +354,7 @@ private:
     uint8_t _display_system_state_master_error_code_prev;       // backup of display system state master_error_code
     uint32_t _last_error_report_ms;                             // system time that flag changes were last reported (used to prevent spamming user)
     MotorStatus _motor_status_prev;                             // backup of motor status
-    static AP_Torqeedo *_singleton;
+    static AP_Torqeedo_R *_singleton;
 
     // returns a human-readable string corresponding the passed-in
     // master error code (see page 93 of https://media.torqeedo.com/downloads/manuals/torqeedo-Travel-manual-DE-EN.pdf)
@@ -363,7 +363,7 @@ private:
 };
 
 namespace AP {
-    AP_Torqeedo *torqeedo();
+    AP_Torqeedo_R *torqeedo_R();
 };
 
 #endif // HAL_TORQEEDO_ENABLED

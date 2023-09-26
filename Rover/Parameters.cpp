@@ -646,9 +646,13 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
     AP_GROUPINFO("FS_OPTIONS", 48, ParametersG2, fs_options, 0),
 
 #if HAL_TORQEEDO_ENABLED
-    // @Group: TRQD_
-    // @Path: ../libraries/AP_Torqeedo/AP_Torqeedo.cpp
-    AP_SUBGROUPINFO(torqeedo, "TRQD_", 49, ParametersG2, AP_Torqeedo),
+    // @Group: TRQDL_
+    // @Path: ../libraries/AP_Torqeedo/AP_Torqeedo_L.cpp
+    AP_SUBGROUPINFO(torqeedo_L, "TRQDL_", 49, ParametersG2, AP_Torqeedo_L),
+
+    // @Group: TRQDR_
+    // @Path: ../libraries/AP_Torqeedo/AP_Torqeedo_R.cpp
+    AP_SUBGROUPINFO(torqeedo_R, "TRQDR_", 50, ParametersG2, AP_Torqeedo_R),
 #endif
 
     // @Group: PSC
