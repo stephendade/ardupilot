@@ -647,11 +647,11 @@ const AP_Param::GroupInfo ParametersG2::var_info[] = {
 
 #if HAL_TORQEEDO_ENABLED
     // @Group: TRQDL_
-    // @Path: ../libraries/AP_Torqeedo/AP_Torqeedo_L.cpp
+    // @Path: ../libraries/AP_Torqeedo_L/AP_Torqeedo_L.cpp
     AP_SUBGROUPINFO(torqeedo_L, "TRQDL_", 49, ParametersG2, AP_Torqeedo_L),
 
     // @Group: TRQDR_
-    // @Path: ../libraries/AP_Torqeedo/AP_Torqeedo_R.cpp
+    // @Path: ../libraries/AP_Torqeedo_R/AP_Torqeedo_R.cpp
     AP_SUBGROUPINFO(torqeedo_R, "TRQDR_", 50, ParametersG2, AP_Torqeedo_R),
 #endif
 
