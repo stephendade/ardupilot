@@ -1149,7 +1149,7 @@ AP_Torqeedo_R *AP_Torqeedo_R::get_singleton()
 AP_Torqeedo_R *AP_Torqeedo_R::_singleton = nullptr;
 
 namespace AP {
-AP_Torqeedo_R *torqeedo()
+AP_Torqeedo_R *torqeedo_R()
 {
     return AP_Torqeedo_R::get_singleton();
 }
