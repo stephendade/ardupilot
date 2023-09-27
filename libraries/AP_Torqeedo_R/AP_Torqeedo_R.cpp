@@ -240,7 +240,7 @@ void AP_Torqeedo_R::thread_main()
             if (_send_motor_speed) {
                 send_motor_speed_cmd();
                 _send_motor_speed = false;
-                log_update = true;
+                //log_update = true;
             }
         }
 
@@ -658,6 +658,7 @@ void AP_Torqeedo_R::parse_message()
                             (unsigned)_display_system_setup.batt_capacity,
                             (unsigned)_display_system_setup.batt_charge_pct);
                 }
+                gcs().send_named_float("T_R_CHG", _display_system_setup.batt_charge_pct);
             } else {
                 // unexpected length
                 _parse_error_count++;
@@ -724,6 +725,8 @@ void AP_Torqeedo_R::parse_message()
                                                        (double)_motor_param.pcb_temp,
                                                        (double)_motor_param.stator_temp);
                 }
+                gcs().send_named_float("T_R_VOLT", _motor_param.voltage);
+                gcs().send_named_float("T_R_CURR", _motor_param.current);
             } else {
                 // unexpected length
                 _parse_error_count++;
@@ -1109,6 +1112,7 @@ void AP_Torqeedo_R::log_TRQD(bool force_logging)
                 (unsigned long)_parse_success_count,
                 (unsigned long)_parse_error_count);
     }
+    gcs().send_named_float("T_R_HLTH", health);
 }
 
 // send ESC telemetry
