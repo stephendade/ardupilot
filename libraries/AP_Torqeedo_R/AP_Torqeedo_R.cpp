@@ -605,7 +605,9 @@ void AP_Torqeedo_R::parse_message()
                             (double)_display_system_state.batt_voltage,
                             (double)_display_system_state.batt_current);
                 }
-
+                gcs().send_named_float("T_R_RPM", _display_system_state.motor_rpm);
+                gcs().send_named_float("T_R_MIN", _display_system_state.range_minutes);
+                gcs().send_named_float("T_R_THR", calc_motor_speed_limited(_motor_speed_desired));
                 // report any errors
                 report_error_codes();
             } else {
