@@ -353,6 +353,7 @@ void AP_Torqeedo_R::report_error_codes()
     if (_display_system_state.flags.temp_warning) {
         gcs().send_text(MAV_SEVERITY_CRITICAL, "%s batt nearly empty", msg_prefix);
     }
+    gcs().send_named_float("T_R_ERR", _display_system_state.master_error_code);
     if (_display_system_state.master_error_code > 0) {
         const char *error_string = map_master_error_code_to_string(_display_system_state.master_error_code);
         if (error_string != nullptr) {
