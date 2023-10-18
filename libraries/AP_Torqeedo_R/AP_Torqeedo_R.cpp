@@ -609,6 +609,9 @@ void AP_Torqeedo_R::parse_message()
                 gcs().send_named_float("T_R_RPM", _display_system_state.motor_rpm);
                 gcs().send_named_float("T_R_MIN", _display_system_state.range_minutes);
                 gcs().send_named_float("T_R_THR", calc_motor_speed_limited(_motor_speed_desired));
+                gcs().send_named_float("T_R_VOLT", _display_system_state.batt_voltage);
+                gcs().send_named_float("T_R_CURR", _display_system_state.batt_current);
+                gcs().send_named_float("T_R_CHG", _display_system_state.batt_charge_pct);
                 // report any errors
                 report_error_codes();
             } else {
@@ -661,7 +664,6 @@ void AP_Torqeedo_R::parse_message()
                             (unsigned)_display_system_setup.batt_capacity,
                             (unsigned)_display_system_setup.batt_charge_pct);
                 }
-                gcs().send_named_float("T_R_CHG", _display_system_setup.batt_charge_pct);
             } else {
                 // unexpected length
                 _parse_error_count++;
@@ -728,8 +730,6 @@ void AP_Torqeedo_R::parse_message()
                                                        (double)_motor_param.pcb_temp,
                                                        (double)_motor_param.stator_temp);
                 }
-                gcs().send_named_float("T_R_VOLT", _motor_param.voltage);
-                gcs().send_named_float("T_R_CURR", _motor_param.current);
             } else {
                 // unexpected length
                 _parse_error_count++;
