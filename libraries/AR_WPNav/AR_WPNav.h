@@ -106,6 +106,9 @@ public:
     // parameter var table
     static const struct AP_Param::GroupInfo var_info[];
 
+    // return true if vehicle should start decel to ensure a 0 speed at destination
+    bool should_start_decel();
+
 protected:
 
     // true if update has been called recently

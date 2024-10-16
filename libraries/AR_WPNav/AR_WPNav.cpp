@@ -393,6 +393,33 @@ bool AR_WPNav::get_stopping_location(Location& stopping_loc)
     return true;
 }
 
+// given the current speed and distance to destination, return true if the vehicle should start
+// deceleration to ensure a 0 speed at the destination
+bool AR_WPNav::should_start_decel() {
+    Location current_loc;
+    if (!AP::ahrs().get_location(current_loc)) {
+        return false;
+    }
+
+    // get current velocity vector and speed
+    const Vector2f velocity = AP::ahrs().groundspeed_vector();
+    const float speed = velocity.length();
+
+    // avoid divide by zero
+    if (!is_positive(speed)) {
+        return false;
+    }
+
+    // get stopping distance in meters
+    const float stopping_dist = _atc.get_stopping_distance(speed);
+
+    if (stopping_dist > current_loc.get_distance(_destination)) {
+        return true;
+    }
+
+    return false;
+}
+
 // true if update has been called recently
 bool AR_WPNav::is_active() const
 {
@@ -419,6 +446,12 @@ void AR_WPNav::advance_wp_target_along_track(const Location &current_loc, float 
 
     // use _track_scalar_dt to slow down S-Curve time to prevent target moving too far in front of vehicle
     Vector2f curr_target_vel = _pos_control.get_desired_velocity();
+
+    // if we are expecting a pivot turn and are within stopping distance, start decel
+    if ( _pivot_at_next_wp && should_start_decel()) {
+        curr_target_vel = Vector2f{0.0f, 0.0f};
+    }
+
     float track_scaler_dt = 1.0f;
     if (is_positive(curr_target_vel.length())) {
         Vector2f track_direction = curr_target_vel.normalized();
