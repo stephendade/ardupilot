@@ -2,7 +2,7 @@
 
 #include <AP_Common/AP_Common.h>
 #include <AC_PID/AC_PID.h>
-#include <AC_PID/AC_P.h>
+#include <AC_PID/AC_PI.h>
 
 class AR_AttitudeControl {
 public:
@@ -31,7 +31,7 @@ public:
 
     // return a desired turn-rate given a desired heading in radians
     // normally the results are later passed into get_steering_out_rate
-    float get_turn_rate_from_heading(float heading_rad, float rate_max_rads) const;
+    float get_turn_rate_from_heading(float heading_rad, float rate_max_rads, float dt);
 
     // return a steering servo output given a desired yaw rate in radians/sec.
     // positive yaw is to the right
@@ -94,7 +94,7 @@ public:
     float get_sail_out_from_heel(float desired_heel, float dt);
 
     // low level control accessors for reporting and logging
-    AC_P& get_steering_angle_p() { return _steer_angle_p; }
+    AC_PI& get_steering_angle_pi() { return _steer_angle_pi; }
     AC_PID& get_steering_rate_pid() { return _steer_rate_pid; }
     AC_PID& get_pitch_to_throttle_pid() { return _pitch_to_throttle_pid; }
     AC_PID& get_sailboat_heel_pid() { return _sailboat_heel_pid; }
@@ -141,7 +141,7 @@ private:
     static AR_AttitudeControl *_singleton;
 
     // parameters
-    AC_P     _steer_angle_p;        // steering angle controller
+    AC_PI     _steer_angle_pi;        // steering angle controller
     AC_PID   _steer_rate_pid;       // steering rate controller
     AC_PID   _throttle_speed_pid;   // throttle speed controller
     AC_PID   _pitch_to_throttle_pid;// balancebot pitch controller

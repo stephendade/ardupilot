@@ -21,6 +21,8 @@
 
 // attitude control default definition
 #define AR_ATTCONTROL_STEER_ANG_P       2.00f
+#define AR_ATTCONTROL_STEER_ANG_I       0.50f
+#define AR_ATTCONTROL_STEER_ANG_IMAX    1.00f
 #define AR_ATTCONTROL_STEER_RATE_FF     0.20f
 #define AR_ATTCONTROL_STEER_RATE_P      0.20f
 #define AR_ATTCONTROL_STEER_RATE_I      0.20f
@@ -300,7 +302,7 @@ const AP_Param::GroupInfo AR_AttitudeControl::var_info[] = {
     // @Range: 1.000 10.000
     // @Increment: 0.1
     // @User: Standard
-    AP_SUBGROUPINFO(_steer_angle_p, "_STR_ANG_", 6, AR_AttitudeControl, AC_P),
+    AP_SUBGROUPINFO(_steer_angle_pi, "_STR_ANG_", 6, AR_AttitudeControl, AC_PI),
 
     // @Param: _STR_ACC_MAX
     // @DisplayName: Steering control angular acceleration maximum
@@ -568,7 +570,7 @@ const AP_Param::GroupInfo AR_AttitudeControl::var_info[] = {
 };
 
 AR_AttitudeControl::AR_AttitudeControl() :
-    _steer_angle_p(AR_ATTCONTROL_STEER_ANG_P),
+    _steer_angle_pi(AR_ATTCONTROL_STEER_ANG_P, AR_ATTCONTROL_STEER_ANG_I, AR_ATTCONTROL_STEER_ANG_IMAX),
     _steer_rate_pid(AR_ATTCONTROL_STEER_RATE_P, AR_ATTCONTROL_STEER_RATE_I, AR_ATTCONTROL_STEER_RATE_D, AR_ATTCONTROL_STEER_RATE_FF, AR_ATTCONTROL_STEER_RATE_IMAX, 0.0f, AR_ATTCONTROL_STEER_RATE_FILT, 0.0f),
     _throttle_speed_pid(AR_ATTCONTROL_THR_SPEED_P, AR_ATTCONTROL_THR_SPEED_I, AR_ATTCONTROL_THR_SPEED_D, 0.0f, AR_ATTCONTROL_THR_SPEED_IMAX, 0.0f, AR_ATTCONTROL_THR_SPEED_FILT, 0.0f),
     _pitch_to_throttle_pid(AR_ATTCONTROL_PITCH_THR_P, AR_ATTCONTROL_PITCH_THR_I, AR_ATTCONTROL_PITCH_THR_D, 0.0f, AR_ATTCONTROL_PITCH_THR_IMAX, 0.0f, AR_ATTCONTROL_PITCH_THR_FILT, 0.0f),
@@ -605,18 +607,18 @@ float AR_AttitudeControl::get_steering_out_lat_accel(float desired_accel, bool m
 float AR_AttitudeControl::get_steering_out_heading(float heading_rad, float rate_max_rads, bool motor_limit_left, bool motor_limit_right, float dt)
 {
     // calculate the desired turn rate (in radians) from the angle error (also in radians)
-    float desired_rate = get_turn_rate_from_heading(heading_rad, rate_max_rads);
+    float desired_rate = get_turn_rate_from_heading(heading_rad, rate_max_rads, dt);
 
     return get_steering_out_rate(desired_rate, motor_limit_left, motor_limit_right, dt);
 }
 
 // return a desired turn-rate given a desired heading in radians
-float AR_AttitudeControl::get_turn_rate_from_heading(float heading_rad, float rate_max_rads) const
+float AR_AttitudeControl::get_turn_rate_from_heading(float heading_rad, float rate_max_rads, float dt)
 {
     const float yaw_error = wrap_PI(heading_rad - AP::ahrs().get_yaw());
 
     // Calculate the desired turn rate (in radians) from the angle error (also in radians)
-    float desired_rate = _steer_angle_p.get_p(yaw_error);
+    float desired_rate = _steer_angle_pi.update(AP::ahrs().get_yaw(), heading_rad, dt);
 
     // limit desired_rate if a custom pivot turn rate is selected, otherwise use ATC_STR_RAT_MAX
     if (is_positive(rate_max_rads)) {
@@ -626,6 +628,7 @@ float AR_AttitudeControl::get_turn_rate_from_heading(float heading_rad, float ra
     // if acceleration limit is provided, ensure rate can be slowed to zero in time to stop at heading_rad (i.e. avoid overshoot)
     if (is_positive(_steer_accel_max)) {
         const float steer_accel_rate_max_rads = safe_sqrt(2.0 * fabsf(yaw_error) * radians(_steer_accel_max));
+        //const float steer_accel_rate_max_rads = fabsf(((0.5f * radians(_steer_accel_max) * dt * dt) - fabsf(yaw_error)) / dt);
         desired_rate = constrain_float(desired_rate, -steer_accel_rate_max_rads, steer_accel_rate_max_rads);
     }
 
