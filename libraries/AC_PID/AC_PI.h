@@ -27,6 +27,11 @@ public:
         return integrator;
     }
 
+    // reset the integrator
+    void reset_I() {
+        integrator = 0;
+    }
+
 protected:
     AP_Float        kP;
     AP_Float        kI;
