@@ -98,6 +98,8 @@ void AR_PivotTurn::check_activation(float desired_heading_deg, bool force_active
 
     // if error is larger than _pivot_angle start pivot steering
     if (yaw_error > _angle || force_active) {
+        // reset PI turn angle controller
+        _atc.get_steering_angle_pi().reset_I();
         _active = true;
         _delay_start_ms = 0;
         return;
@@ -137,7 +139,7 @@ bool AR_PivotTurn::would_activate(float yaw_change_deg) const
 float AR_PivotTurn::get_turn_rate_rads(float desired_heading_deg, float dt)
 {
     // handle pivot turns
-    const float desired_turn_rate_rads = _atc.get_turn_rate_from_heading(radians(desired_heading_deg), radians(_rate_max));
+    const float desired_turn_rate_rads = _atc.get_turn_rate_from_heading(radians(desired_heading_deg), radians(_rate_max), dt);
 
     // update flag so that it can be cleared
     check_activation(desired_heading_deg);
