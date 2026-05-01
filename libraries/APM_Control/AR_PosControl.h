@@ -2,7 +2,7 @@
 
 #include <AP_Common/AP_Common.h>
 #include <APM_Control/AR_AttitudeControl.h>
-#include <AC_PID/AC_P_2D.h>            // P library (2-axis)
+#include <AC_PID/AC_PI_2D.h>            // PI library (2-axis)
 #include <AC_PID/AC_PID_2D.h>          // PID library (2-axis)
 
 class AR_PosControl {
@@ -75,7 +75,7 @@ public:
     Vector2p get_pos_error() const;
 
     // get pid controllers
-    AC_P_2D& get_pos_p() { return _p_pos; }
+    AC_PI_2D& get_pos_pid() { return _pi_pos; }
     AC_PID_2D& get_vel_pid() { return _pid_vel; }
 
     // write PSC logs
@@ -96,7 +96,7 @@ private:
     AR_AttitudeControl &_atc;       // rover attitude control library
 
     // parameters
-    AC_P_2D   _p_pos;               // position P controller to convert distance error to desired velocity
+    AC_PI_2D   _pi_pos;               // position PI controller to convert distance error to desired velocity
     AC_PID_2D _pid_vel;             // velocity PID controller to convert velocity error to desired acceleration
 
     // limits

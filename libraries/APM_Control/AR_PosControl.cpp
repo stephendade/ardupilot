@@ -25,6 +25,9 @@
 
 #define AR_POSCON_TIMEOUT_MS            100     // timeout after 0.1 sec
 #define AR_POSCON_POS_P                 0.2f    // default position P gain
+#define AR_POSCON_POS_I                 0.0f    // default position I gain
+#define AR_POSCON_POS_IMAX              1.0f    // default position IMAX
+#define AR_POSCON_POS_FILT              5.0f    // default position filter
 #define AR_POSCON_VEL_P                 1.0f    // default velocity P gain
 #define AR_POSCON_VEL_I                 0.0f    // default velocity I gain
 #define AR_POSCON_VEL_D                 0.0f    // default velocity D gain
@@ -45,7 +48,29 @@ const AP_Param::GroupInfo AR_PosControl::var_info[] = {
     // @Description: Position controller P gain.  Converts the distance to the target location into a desired speed which is then passed to the loiter latitude rate controller
     // @Range: 0.500 2.000
     // @User: Standard
-    AP_SUBGROUPINFO(_p_pos, "_POS_", 1, AR_PosControl, AC_P_2D),
+
+    // @Param: _POS_I
+    // @DisplayName: Position controller I gain
+    // @Description: Position controller I gain.  Corrects long-term difference between desired and actual position to a target velocity
+    // @Range: 0.00 1.00
+    // @Increment: 0.01
+    // @User: Advanced
+
+    // @Param: _POS_IMAX
+    // @DisplayName: Position controller integrator maximum
+    // @Description: Position controller integrator maximum.  Constrains the target velocity that the I gain will output
+    // @Range: 0 4500
+    // @Increment: 10
+    // @Units: cm/s
+    // @User: Advanced
+
+    // @Param: _POS_FILT
+    // @DisplayName: Position (horizontal) input filter
+    // @Description: Position (horizontal) input filter.  This filter (in Hz) is applied to the input for P and I terms
+    // @Range: 0 100
+    // @Units: Hz
+    // @User: Advanced
+    AP_SUBGROUPINFO(_pi_pos, "_POS_", 1, AR_PosControl, AC_PI_2D),
 
     // @Param: _VEL_P
     // @DisplayName: Velocity (horizontal) P gain
@@ -103,7 +128,7 @@ const AP_Param::GroupInfo AR_PosControl::var_info[] = {
 
 AR_PosControl::AR_PosControl(AR_AttitudeControl& atc) :
     _atc(atc),
-    _p_pos(AR_POSCON_POS_P),
+    _pi_pos(AR_POSCON_POS_P, AR_POSCON_POS_I, AR_POSCON_POS_IMAX, AR_POSCON_POS_FILT, AR_POSCON_DT),
     _pid_vel(AR_POSCON_VEL_P, AR_POSCON_VEL_I, AR_POSCON_VEL_D, AR_POSCON_VEL_FF, AR_POSCON_VEL_IMAX, AR_POSCON_VEL_FILT, AR_POSCON_VEL_FILT_D)
 {
     _singleton = this;
@@ -127,18 +152,21 @@ void AR_PosControl::update(float dt)
     // check for ekf xy position reset
     handle_ekf_xy_reset();
 
-    // if no recent calls reset velocity controller
+    // if no recent calls reset velocity and position controllers
     if (!is_active()) {
         _pid_vel.reset_I();
         _pid_vel.reset_filter();
+        _pi_pos.reset_I();
+        //_pi_pos.reset_filter();
     }
     _last_update_ms = AP_HAL::millis();
 
     // calculate position error and convert to desired velocity
     _vel_target.zero();
     if (_pos_target_valid) {
-        Vector2p pos_target = _pos_target;
-        _vel_target = _p_pos.update_all(pos_target, curr_pos_NED_m.xy());
+        _pi_pos.set_dt(dt);
+        _pi_pos.set_input((_pos_target - curr_pos_NED_m.xy()).tofloat());
+        _vel_target = _pi_pos.get_pi();
     }
 
     // calculation velocity error
@@ -159,7 +187,7 @@ void AR_PosControl::update(float dt)
     if (avoid != nullptr) {
         Vector3f vel_3d_cms{_vel_target.x * 100.0f, _vel_target.y * 100.0f, 0.0f};
         const float accel_max_cmss = MIN(_accel_max, _lat_accel_max) * 100.0;
-        avoid->adjust_velocity(vel_3d_cms, backing_up, _p_pos.kP(), accel_max_cmss, _p_pos.kP(), accel_max_cmss, dt);
+        avoid->adjust_velocity(vel_3d_cms, backing_up, _pi_pos.kP(), accel_max_cmss, _pi_pos.kP(), accel_max_cmss, dt);
         _vel_target.x = vel_3d_cms.x * 0.01;
         _vel_target.y = vel_3d_cms.y * 0.01;
     }
@@ -230,7 +258,7 @@ void AR_PosControl::set_limits(float speed_max, float accel_max, float lat_accel
     _jerk_max = MAX(jerk_max, 0);
 
     // set position P controller limits
-    _p_pos.set_limits(_speed_max, MIN(_accel_max, _lat_accel_max), _jerk_max);
+    // _pi_pos.set_limits(_speed_max, MIN(_accel_max, _lat_accel_max), _jerk_max);
 }
 
 // setter to allow vehicle code to provide turn related param values to this library (should be updated regularly)
@@ -266,6 +294,10 @@ bool AR_PosControl::init()
 
     // clear reversed setting
     _reversed = false;
+
+    // reset position PI controller
+    _pi_pos.reset_I();
+    //_pi_pos.reset_filter();
 
     // initialise ekf xy reset handler
     init_ekf_xy_reset();
@@ -421,7 +453,7 @@ void AR_PosControl::handle_ekf_xy_reset()
         if (!AP::ahrs().get_relative_position_NE_origin(pos_ne_m)) {
             return;
         }
-        _pos_target = pos_ne_m + _p_pos.get_error().topostype();
+        _pos_target = pos_ne_m; // + _pi_pos.get_error().topostype();
 
         Vector3f vel_NED;
         if (!AP::ahrs().get_velocity_NED(vel_NED)) {
