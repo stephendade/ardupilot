@@ -531,7 +531,12 @@ void AR_WPNav::update_steering_and_speed(const Location &current_loc, float dt)
 // settor to allow vehicle code to provide turn related param values to this library (should be updated regularly)
 void AR_WPNav::set_turn_params(float turn_radius, bool pivot_possible)
 {
-    _turn_radius = pivot_possible ? 0.0 : turn_radius;
+    if (pivot_possible) {
+        _turn_radius = _pivot_at_next_wp ? 0.0f : turn_radius;
+    } else {
+        _turn_radius = turn_radius;
+    }
+    _pos_control.set_turn_params(_turn_radius);
     _pivot.enable(pivot_possible);
 }
 
