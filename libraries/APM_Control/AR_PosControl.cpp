@@ -234,13 +234,9 @@ void AR_PosControl::set_limits(float speed_max, float accel_max, float lat_accel
 }
 
 // setter to allow vehicle code to provide turn related param values to this library (should be updated regularly)
-void AR_PosControl::set_turn_params(float turn_radius, bool pivot_possible)
+void AR_PosControl::set_turn_params(float turn_radius)
 {
-    if (pivot_possible) {
-        _turn_radius = 0;
-    } else {
-        _turn_radius = turn_radius;
-    }
+    _turn_radius = turn_radius;
 }
 
 // initialise the position controller to the current position, velocity, acceleration and attitude

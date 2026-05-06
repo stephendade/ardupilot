@@ -26,7 +26,7 @@ public:
     void set_limits(float speed_max, float accel_max, float lat_accel_max, float jerk_max);
 
     // setter to allow vehicle code to provide turn related param values to this library (should be updated regularly)
-    void set_turn_params(float turn_radius, bool pivot_possible);
+    void set_turn_params(float turn_radius);
 
     // set reversed
     void set_reversed(bool reversed) { _reversed = reversed; }
