@@ -309,6 +309,15 @@ bool ModeAuto::get_desired_location(Location& destination) const
 // set desired location to drive to
 bool ModeAuto::set_desired_location(const Location &destination, Location next_destination)
 {
+    // do GCS_SEND_TEXT for debugging purposes
+    Location current_loc;
+    if (AP::ahrs().get_location(current_loc)) {
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Setting destination. Dist to current dest: %.1f m. Dist to new dest: %.1f m.",
+                      current_loc.get_distance(g2.wp_nav.get_destination()), current_loc.get_distance(destination));
+        //check the tartget speed and turnrate to see if the vehicle is alreay getting ready for the turn
+        GCS_SEND_TEXT(MAV_SEVERITY_INFO, "Desired speed: %.1f m/s. Desired turn rate: %.1f deg/s",
+                      g2.wp_nav.get_speed(), g2.wp_nav.get_turn_rate_rads() * 180.0f / M_PI);
+    }
     // call parent
     if (!Mode::set_desired_location(destination, next_destination)) {
         return false;

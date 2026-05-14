@@ -288,6 +288,18 @@ bool AR_WPNav::set_desired_location(const Location& destination, Location next_d
                                              AR_WPNAV_SNAP_MAX,             // snap
                                              _pos_control.get_jerk_max());
 
+            const float wp_radius = MAX(_radius, _turn_radius);
+            const float stopping_dist = _atc.get_stopping_distance(_pos_control.get_speed_max());
+            const float speed_at_wp_radius = _pos_control.get_speed_max() * MIN(1.0f, _radius / stopping_dist);
+            ::printf("AR_WPNav: stopping dist %.2f, speed at wp_radius %.2f\n", (double)stopping_dist, (double)speed_at_wp_radius);
+            // print the speed required to stay within turn_max_g
+            const float speed_at_turn_max_g = safe_sqrt(_atc.get_turn_lat_accel_max() * _radius);
+            ::printf("AR_WPNav: speed required at turn_max_g %.2f\n", (double)speed_at_turn_max_g);
+            //print the corner angle and dist to wp that allows the turn_radius
+            const float corner_angle_rad = fabsf(radians(next_wp_yaw_change));
+            const float dist_to_wp_for_radius = wp_radius / tanf(corner_angle_rad * 0.5f);
+            ::printf("AR_WPNav: turn radius %.2f, corner angle %.2f deg, dist to wp for turn radius %.2f\n", (double)wp_radius, (double)degrees(corner_angle_rad), (double)dist_to_wp_for_radius);
+
             // next destination provided so fast waypoint
             _fast_waypoint = true;
         }
@@ -444,6 +456,9 @@ void AR_WPNav::advance_wp_target_along_track(const Location &current_loc, float 
     Vector3f target_vel, target_accel;
 
     // update target position, velocity and acceleration
+    //const float corner_angle_rad = fabsf(radians(next_wp_yaw_change));
+    //const float dist_to_wp_for_radius = _turn_radius * tanf(corner_angle_rad * 0.5f);
+    //const float wp_radius = MAX(_radius, dist_to_wp_for_radius);
     const float wp_radius = MAX(_radius, _turn_radius);
     bool s_finished = _scurve_this_leg.advance_target_along_track(_scurve_prev_leg, _scurve_next_leg, wp_radius, _pos_control.get_lat_accel_max(), _fast_waypoint, _track_scalar_dt * dt, target_pos_3d, target_vel, target_accel);
 
@@ -463,6 +478,13 @@ void AR_WPNav::advance_wp_target_along_track(const Location &current_loc, float 
             const bool past_wp = current_loc.past_interval_finish_line(_origin, _destination);
             _reached_destination = near_wp || past_wp;
         }
+    }
+
+    if (reached_destination()) {
+        //debug print the vehicle's actual velocity and distance to the destination when the waypoint is reached
+        const float distance_to_destination = current_loc.get_distance(_destination);
+        const float speed = curr_vel_NED.length();
+        ::printf("AR_WPNav: reached destination, distance to destination %.2f, speed %.2f\n", (double)distance_to_destination, (double)speed);
     }
 }
 

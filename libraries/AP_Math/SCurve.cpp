@@ -79,6 +79,7 @@ void SCurve::calculate_track(const Vector3p &origin, const Vector3p &destination
     seg_delta = (destination - origin).tofloat();
     if (seg_delta.is_zero() || is_zero(seg_delta.length_squared())) {
         seg_delta.zero();
+        ::printf("SCurve::calculate_track created zero length path\n");
         return;
     }
 
@@ -92,6 +93,7 @@ void SCurve::calculate_track(const Vector3p &origin, const Vector3p &destination
         arc.radius_ne = 0.0f;
         arc.center_ne = Vector2f();
         seg_length = seg_delta.length();
+        ::printf("SCurve::calculate_track created straight path with length %.2f, chord length %.2f, arc angle %.2f\n", (double)seg_length, (double)chord_length, (double)degrees(arc.angle_rad));
     } else {
         is_arc_segment = true;
         arc.angle_rad = arc_ang_rad;
@@ -105,6 +107,7 @@ void SCurve::calculate_track(const Vector3p &origin, const Vector3p &destination
             seg_length = safe_sqrt(sq(seg_delta.z) + sq(arc.length_ne));
             accel_c = is_positive(accel_c) ? accel_c : accel_xy;
             speed_xy = MIN(speed_xy, safe_sqrt(accel_c * arc.radius_ne));
+            ::printf("SCurve::calculate_track created arc path with angle %.2f deg, radius %.2f, length %.2f\n", (double)degrees(arc.angle_rad), (double)arc.radius_ne, (double)seg_length);
         } else {
             // straight segment
             is_arc_segment = false;
@@ -113,10 +116,12 @@ void SCurve::calculate_track(const Vector3p &origin, const Vector3p &destination
             arc.radius_ne = 0.0f;
             arc.center_ne = Vector2f();
             seg_length = seg_delta.length();
+            ::printf("SCurve::calculate_track created straight2 path with length %.2f\n", (double)seg_length);
         }
     }
     if (is_zero(seg_length)) {
         seg_delta.zero();
+        ::printf("SCurve::calculate_track2 created zero length path\n");
         return;
     }
 
@@ -149,6 +154,15 @@ void SCurve::calculate_track(const Vector3p &origin, const Vector3p &destination
         INTERNAL_ERROR(AP_InternalError::error_t::invalid_arg_or_result);
         init();
     }
+
+    //print path segments for debugging
+// #if CONFIG_HAL_BOARD == HAL_BOARD_SITL
+//     ::printf("SCurve::calculate_track created path with %u segments\n", num_segs);
+//     for (uint8_t i = 0; i < num_segs; i++) {
+//         ::printf("  seg %u: type %u, jerk_ref %.2f, end_time %.2f, end_accel %.2f, end_vel %.2f, end_pos %.2f\n", (unsigned)i,
+//             (unsigned)segment[i].seg_type, (double)segment[i].jerk_ref, (double)segment[i].end_time, (double)segment[i].end_accel, (double)segment[i].end_vel, (double)segment[i].end_pos);
+//     }
+// #endif
 }
 
 // set maximum velocity and re-calculate the path using these limits
